@@ -11,10 +11,21 @@ public class SessionManager {
     private Map<Integer, Session> sessions = new HashMap<>();
     private int nextId = 1;
 
-    // =========================
-    // LOAD
-    // =========================
-    public int load(String path) throws IOException {
+    private static void checkSession(int id, SessionManager manager) {
+        if (id == -1 || manager.getSession(id) == null) {
+            throw new IllegalStateException("No active session");
+        }
+    }
+
+    public void close(int id) {
+        if (!sessions.containsKey(id)) {
+            throw new RuntimeException("Session not found: " + id);
+        }
+
+        sessions.remove(id);
+    }
+
+    private ImageData decodeImage(String path) throws IOException {
 
         File file = new File(path);
         BufferedImage img;
@@ -32,10 +43,35 @@ public class SessionManager {
             throw new IOException("Invalid image: " + path);
         }
 
-        Session session = new Session(nextId, img, format, path);
-        sessions.put(nextId, session);
+        return new ImageData(img, format, path);
+    }
 
+    // =========================
+    // LOAD
+    // =========================
+    public int load(String path) throws IOException {
+
+        ImageData data = decodeImage(path);
+
+        Session session = new Session(
+                nextId,
+                data.image,
+                data.format,
+                data.path
+        );
+
+        sessions.put(nextId, session);
         return nextId++;
+    }
+
+    // =========================
+    // ADD
+    // =========================
+    public ImageData loadImage(String path) throws IOException {
+
+        ImageData data = decodeImage(path);
+
+        return new ImageData(data.image, data.format, data.path);
     }
 
     private boolean isPNM(String path) {

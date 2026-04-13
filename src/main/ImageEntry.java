@@ -8,19 +8,32 @@ public class ImageEntry {
 
     BufferedImage image;
     List<ImageOperation> ops = new ArrayList<>();
+
     String format;
     String sourcePath;
 
-    // ✔ ONLY constructor (no more overload confusion)
+    // ONLY constructor
     public ImageEntry(BufferedImage image, String format, String sourcePath) {
         this.image = image;
         this.format = format;
         this.sourcePath = sourcePath;
     }
 
+    // =========================
+    // OPERATIONS
+    // =========================
+
     public void addOperation(ImageOperation op) {
         ops.add(op);
     }
+
+    public void removeOperation(ImageOperation op) {
+        ops.remove(op);
+    }
+
+    // =========================
+    // APPLY OPERATIONS
+    // =========================
 
     public BufferedImage process() {
         BufferedImage result = image;
@@ -32,6 +45,10 @@ public class ImageEntry {
         return result;
     }
 
+    // =========================
+    // GETTERS
+    // =========================
+
     public String getFormat() {
         return format;
     }
@@ -42,5 +59,9 @@ public class ImageEntry {
 
     public void setSourcePath(String sourcePath) {
         this.sourcePath = sourcePath;
+    }
+
+    public List<ImageOperation> getOperations() {
+        return ops;
     }
 }

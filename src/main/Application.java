@@ -23,7 +23,9 @@ public class Application {
             try {
                 switch (action) {
 
-                    // LOAD → creates + switches
+                    // =========================
+                    // LOAD
+                    // =========================
                     case "load": {
 
                         if (cmd.length < 2) {
@@ -31,20 +33,16 @@ public class Application {
                             break;
                         }
 
-                        try {
-                            int id = manager.load(cmd[1]);
-                            activeSession = id;
+                        int id = manager.load(cmd[1]);
+                        activeSession = id;
 
-                            System.out.println("Loaded session ID: " + id);
-
-                        } catch (Exception e) {
-                            System.out.println("Error: " + e.getMessage());
-                        }
-
+                        System.out.println("Loaded session ID: " + id);
                         break;
                     }
 
-                    // SWITCH SESSION
+                    // =========================
+                    // SWITCH
+                    // =========================
                     case "switch": {
 
                         if (cmd.length < 2) {
@@ -70,9 +68,12 @@ public class Application {
                         break;
                     }
 
-                    // ROTATE
+                    // =========================
+                    // ROTATE (NOW COMMAND-BASED)
+                    // =========================
                     case "rotate": {
-                        checkSession(activeSession);
+
+                        checkSession(activeSession, manager);
 
                         if (cmd.length < 2) {
                             System.out.println("Usage: rotate <left|right>");
@@ -90,63 +91,105 @@ public class Application {
                             break;
                         }
 
-                        manager.getSession(activeSession).addOperation(new Rotate(dir));
+                        manager.getSession(activeSession)
+                                .execute(new OperationCommand(new Rotate(dir)));
 
-                        System.out.println("Rotate " + dir + " added");
+                        System.out.println("Rotate " + dir + " executed");
                         break;
                     }
 
+                    // =========================
                     // GRAYSCALE
+                    // =========================
                     case "grayscale": {
-                        checkSession(activeSession);
 
-                        manager.getSession(activeSession).addOperation(new Grayscale());
+                        checkSession(activeSession, manager);
 
-                        System.out.println("Grayscale added");
+                        manager.getSession(activeSession)
+                                .execute(new OperationCommand(new Grayscale()));
+
+                        System.out.println("Grayscale executed");
                         break;
                     }
 
+                    // =========================
                     // NEGATIVE
+                    // =========================
                     case "negative": {
-                        checkSession(activeSession);
 
-                        manager.getSession(activeSession).addOperation(new Negative());
+                        checkSession(activeSession, manager);
 
-                        System.out.println("Negative added");
+                        manager.getSession(activeSession)
+                                .execute(new OperationCommand(new Negative()));
+
+                        System.out.println("Negative executed");
                         break;
                     }
 
-                    // ADD IMAGE
+                    // =========================
+                    // ADD IMAGE (COMMAND)
+                    // =========================
                     case "add": {
-                        checkSession(activeSession);
+
+                        checkSession(activeSession, manager);
 
                         if (cmd.length < 2) {
                             System.out.println("Usage: add <file>");
                             break;
                         }
 
-                        manager.addToSession(activeSession, cmd[1]);
+                        ImageData data = manager.loadImage(cmd[1]);
+
+                        manager.getSession(activeSession).execute(new AddImageCommand(data.image, data.format, data.path));
 
                         System.out.println("Image added to session " + activeSession);
                         break;
                     }
 
-                    // SAVE
-                    case "save": {
-                        checkSession(activeSession);
+                    // =========================
+                    // UNDO
+                    // =========================
+                    case "undo": {
 
-                        try {
-                            manager.save(activeSession);
-                            System.out.println("Session " + activeSession + " saved successfully");
-                        } catch (Exception e) {
-                            System.out.println("Error: " + e.getMessage());
-                        }
+                        checkSession(activeSession, manager);
+
+                        manager.getSession(activeSession).undo();
+                        System.out.println("Undo executed");
+
                         break;
                     }
 
+                    // =========================
+                    // REDO
+                    // =========================
+                    case "redo": {
+
+                        checkSession(activeSession, manager);
+
+                        manager.getSession(activeSession).redo();
+                        System.out.println("Redo executed");
+
+                        break;
+                    }
+
+                    // =========================
+                    // SAVE
+                    // =========================
+                    case "save": {
+
+                        checkSession(activeSession, manager);
+
+                        manager.save(activeSession);
+                        System.out.println("Session " + activeSession + " saved successfully");
+                        break;
+                    }
+
+                    // =========================
                     // SAVE AS
+                    // =========================
                     case "saveas": {
-                        checkSession(activeSession);
+
+                        checkSession(activeSession, manager);
 
                         if (cmd.length < 2) {
                             System.out.println("Usage: saveas <file>");
@@ -159,7 +202,22 @@ public class Application {
                         break;
                     }
 
+                    case "close": {
+
+                        checkSession(activeSession, manager);
+
+                        manager.close(activeSession);
+
+                        System.out.println("Closed session " + activeSession);
+
+                        activeSession = -1;
+
+                        break;
+                    }
+
+                    // =========================
                     // EXIT
+                    // =========================
                     case "exit": {
                         System.out.println("Done!");
                         sc.close();
@@ -167,7 +225,7 @@ public class Application {
                     }
 
                     default:
-                        System.out.println("Unknown command. Try: load, switch, rotate, grayscale, negative, add, save, saveas, exit");
+                        System.out.println("Unknown command. Try: load, switch, rotate, grayscale, negative, add, undo, redo, save, saveas, exit");
                 }
 
             } catch (Exception e) {
@@ -176,10 +234,9 @@ public class Application {
         }
     }
 
-    private static void checkSession(int id) {
-        if (id == -1) {
-            System.out.println("No active session. Use 'load' or 'switch <id>'");
-            throw new IllegalStateException();
+    private static void checkSession(int id, SessionManager manager) {
+        if (id == -1 || manager.getSession(id) == null) {
+            throw new IllegalStateException("No active session");
         }
     }
 }
