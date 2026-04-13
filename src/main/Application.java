@@ -211,7 +211,6 @@ public class Application {
                         System.out.println("Closed session " + activeSession);
 
                         activeSession = -1;
-
                         break;
                     }
 
