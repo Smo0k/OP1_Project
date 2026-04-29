@@ -2,19 +2,19 @@ package main;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ImageEntry {
 
-    BufferedImage image;
-    List<ImageOperation> ops = new ArrayList<>();
+    private final BufferedImage originalImage;
+    private final List<ImageOperation> operations = new ArrayList<>();
 
-    String format;
-    String sourcePath;
+    private final String format;
+    private final String sourcePath; // logical name inside session
 
-    // ONLY constructor
     public ImageEntry(BufferedImage image, String format, String sourcePath) {
-        this.image = image;
+        this.originalImage = image;
         this.format = format;
         this.sourcePath = sourcePath;
     }
@@ -24,11 +24,15 @@ public class ImageEntry {
     // =========================
 
     public void addOperation(ImageOperation op) {
-        ops.add(op);
+        operations.add(op);
     }
 
     public void removeOperation(ImageOperation op) {
-        ops.remove(op);
+        operations.remove(op);
+    }
+
+    public List<ImageOperation> getOperations() {
+        return Collections.unmodifiableList(operations);
     }
 
     // =========================
@@ -36,9 +40,9 @@ public class ImageEntry {
     // =========================
 
     public BufferedImage process() {
-        BufferedImage result = image;
+        BufferedImage result = originalImage;
 
-        for (ImageOperation op : ops) {
+        for (ImageOperation op : operations) {
             result = op.apply(result);
         }
 
@@ -55,13 +59,5 @@ public class ImageEntry {
 
     public String getSourcePath() {
         return sourcePath;
-    }
-
-    public void setSourcePath(String sourcePath) {
-        this.sourcePath = sourcePath;
-    }
-
-    public List<ImageOperation> getOperations() {
-        return ops;
     }
 }

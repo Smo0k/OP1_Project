@@ -23,4 +23,9 @@ public class Grayscale implements ImageOperation {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Grayscale";
+    }
 }

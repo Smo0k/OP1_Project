@@ -21,4 +21,9 @@ public class Negative implements ImageOperation {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Negative";
+    }
 }

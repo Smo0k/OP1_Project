@@ -46,4 +46,9 @@ public class Rotate implements ImageOperation {
 
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Rotate(" + direction + ")";
+    }
 }

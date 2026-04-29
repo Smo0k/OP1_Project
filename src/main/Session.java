@@ -22,30 +22,8 @@ public class Session {
         return id;
     }
 
-    // =========================
-    // IMAGE MANAGEMENT
-    // =========================
-
-    public void addImage(BufferedImage img, String format, String path) {
-        ImageEntry entry = new ImageEntry(img, format, path);
-        images.add(entry);
-    }
-
-    public void removeImage(ImageEntry entry) {
-        images.remove(entry);
-    }
-
     public List<ImageEntry> getImages() {
         return images;
-    }
-
-    // =========================
-    // OPERATIONS (DIRECT USAGE)
-    // =========================
-    public void addOperation(ImageOperation op) {
-        for (ImageEntry img : images) {
-            img.addOperation(op);
-        }
     }
 
     // =========================
@@ -72,5 +50,47 @@ public class Session {
         Command cmd = undone.pop();
         cmd.execute(this);
         history.push(cmd);
+    }
+
+    public ImageEntry findByPath(String path) {
+        for (ImageEntry e : images) {
+            if (e.getSourcePath().equals(path) ||
+                    e.getSourcePath().endsWith(path)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    public void printInfo() {
+
+        System.out.println("Session ID: " + id);
+
+        if (images.isEmpty()) {
+            System.out.println("No images in session.");
+            return;
+        }
+
+        for (int i = 0; i < images.size(); i++) {
+
+            ImageEntry entry = images.get(i);
+
+            System.out.println(
+                    i + ": " +
+                            entry.getSourcePath() +
+                            (entry.getFormat() != null ? " [" + entry.getFormat() + "]" : "")
+            );
+
+            List<ImageOperation> ops = entry.getOperations();
+
+            if (ops.isEmpty()) {
+                System.out.println("   └─ no operations");
+            } else {
+                for (int j = 0; j < ops.size(); j++) {
+                    String prefix = (j == ops.size() - 1) ? "   └─ " : "   ├─ ";
+                    System.out.println(prefix + ops.get(j));
+                }
+            }
+        }
     }
 }
