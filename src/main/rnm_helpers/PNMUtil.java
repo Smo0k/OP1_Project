@@ -1,10 +1,34 @@
-package main;
+package main.rnm_helpers;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
 
+/**
+ * Utility class for writing images in the PNM (Portable Any Map) format family.
+ * <p>
+ * Supports all major PNM variants:
+ * </p>
+ * <ul>
+ *     <li>P1 / P4 - black and white (ASCII / binary)</li>
+ *     <li>P2 / P5 - grayscale (ASCII / binary)</li>
+ *     <li>P3 / P6 - RGB color (ASCII / binary)</li>
+ * </ul>
+ *
+ * <p>
+ * This class converts a {@link BufferedImage} into the requested PNM format
+ * and writes it directly to a file.
+ * </p>
+ */
 public class PNMUtil {
 
+    /**
+     * Writes an image in the specified PNM format.
+     *
+     * @param img    the image to write
+     * @param file   the output file
+     * @param format the PNM format (P1–P6)
+     * @throws IOException if the format is unsupported or writing fails
+     */
     public static void writePNM(BufferedImage img, File file, String format) throws IOException {
 
         format = format.toUpperCase();
@@ -40,9 +64,9 @@ public class PNMUtil {
         }
     }
 
-    // =========================
-    // P1 (ASCII BW)
-    // =========================
+    /**
+     * Writes a black-and-white ASCII PNM image (P1).
+     */
     private static void writeP1(BufferedImage img, File file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
@@ -55,6 +79,7 @@ public class PNMUtil {
             for (int x = 0; x < w; x++) {
 
                 int rgb = img.getRGB(x, y);
+
                 int gray = (rgb >> 16 & 0xFF)
                         + (rgb >> 8 & 0xFF)
                         + (rgb & 0xFF);
@@ -67,9 +92,9 @@ public class PNMUtil {
         bw.close();
     }
 
-    // =========================
-    // P2 (ASCII grayscale)
-    // =========================
+    /**
+     * Writes a grayscale ASCII PNM image (P2).
+     */
     private static void writeP2(BufferedImage img, File file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
@@ -82,6 +107,7 @@ public class PNMUtil {
             for (int x = 0; x < w; x++) {
 
                 int rgb = img.getRGB(x, y);
+
                 int gray = ((rgb >> 16) & 0xFF)
                         + ((rgb >> 8) & 0xFF)
                         + (rgb & 0xFF);
@@ -96,9 +122,9 @@ public class PNMUtil {
         bw.close();
     }
 
-    // =========================
-    // P3 (ASCII RGB)
-    // =========================
+    /**
+     * Writes an RGB ASCII PNM image (P3).
+     */
     private static void writeP3(BufferedImage img, File file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
@@ -124,9 +150,9 @@ public class PNMUtil {
         bw.close();
     }
 
-    // =========================
-    // P4 (Binary BW)
-    // =========================
+    /**
+     * Writes a black-and-white binary PNM image (P4).
+     */
     private static void writeP4(BufferedImage img, File file) throws IOException {
         OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
 
@@ -142,6 +168,7 @@ public class PNMUtil {
             for (int x = 0; x < w; x++) {
 
                 int rgb = img.getRGB(x, y);
+
                 int gray = ((rgb >> 16) & 0xFF)
                         + ((rgb >> 8) & 0xFF)
                         + (rgb & 0xFF);
@@ -167,9 +194,9 @@ public class PNMUtil {
         os.close();
     }
 
-    // =========================
-    // P5 (Binary grayscale)
-    // =========================
+    /**
+     * Writes a grayscale binary PNM image (P5).
+     */
     private static void writeP5(BufferedImage img, File file) throws IOException {
         OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
 
@@ -181,6 +208,7 @@ public class PNMUtil {
             for (int x = 0; x < w; x++) {
 
                 int rgb = img.getRGB(x, y);
+
                 int gray = ((rgb >> 16) & 0xFF)
                         + ((rgb >> 8) & 0xFF)
                         + (rgb & 0xFF);
@@ -194,9 +222,9 @@ public class PNMUtil {
         os.close();
     }
 
-    // =========================
-    // P6 (Binary RGB)
-    // =========================
+    /**
+     * Writes an RGB binary PNM image (P6).
+     */
     private static void writeP6(BufferedImage img, File file) throws IOException {
         OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
 

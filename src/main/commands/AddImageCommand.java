@@ -1,4 +1,7 @@
-package main;
+package main.commands;
+
+import main.session.Session;
+import main.image_operation.ImageEntry;
 
 import java.awt.image.BufferedImage;
 

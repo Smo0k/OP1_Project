@@ -1,10 +1,36 @@
-package main;
+package main.rnm_helpers;
+
+import main.image_operation.ImageData;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
 
+/**
+ * Reads images in the PNM (Portable Any Map) format family.
+ * <p>
+ * Supported formats include:
+ * </p>
+ * <ul>
+ *     <li>P1 / P4 - black and white (ASCII / binary)</li>
+ *     <li>P2 / P5 - grayscale (ASCII / binary)</li>
+ *     <li>P3 / P6 - RGB color (ASCII / binary)</li>
+ * </ul>
+ *
+ * <p>
+ * The reader converts all formats into a standard
+ * {@link BufferedImage}.
+ * </p>
+ */
 public class PNMReader {
 
+    /**
+     * Reads a PNM image file and converts it into an {@link ImageData} object.
+     *
+     * @param file the PNM file to read
+     * @param path the original file path
+     * @return the loaded image data
+     * @throws IOException if the file is invalid or unsupported
+     */
     public ImageData read(File file, String path) throws IOException {
 
         InputStream is = new BufferedInputStream(new FileInputStream(file));
@@ -17,7 +43,11 @@ public class PNMReader {
                 ? 1
                 : Integer.parseInt(readToken(is));
 
-        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage img = new BufferedImage(
+                width,
+                height,
+                BufferedImage.TYPE_INT_RGB
+        );
 
         switch (magic) {
 
@@ -33,6 +63,7 @@ public class PNMReader {
             case "P5":
                 for (int y = 0; y < height; y++)
                     for (int x = 0; x < width; x++) {
+
                         int g = magic.equals("P2")
                                 ? Integer.parseInt(readToken(is))
                                 : is.read();
@@ -47,9 +78,17 @@ public class PNMReader {
                 for (int y = 0; y < height; y++)
                     for (int x = 0; x < width; x++) {
 
-                        int r = magic.equals("P3") ? Integer.parseInt(readToken(is)) : is.read();
-                        int g = magic.equals("P3") ? Integer.parseInt(readToken(is)) : is.read();
-                        int b = magic.equals("P3") ? Integer.parseInt(readToken(is)) : is.read();
+                        int r = magic.equals("P3")
+                                ? Integer.parseInt(readToken(is))
+                                : is.read();
+
+                        int g = magic.equals("P3")
+                                ? Integer.parseInt(readToken(is))
+                                : is.read();
+
+                        int b = magic.equals("P3")
+                                ? Integer.parseInt(readToken(is))
+                                : is.read();
 
                         r = (r * 255) / maxVal;
                         g = (g * 255) / maxVal;
@@ -62,7 +101,9 @@ public class PNMReader {
             case "P4":
                 for (int y = 0; y < height; y++)
                     for (int x = 0; x < width;) {
+
                         int b = is.read();
+
                         for (int bit = 7; bit >= 0 && x < width; bit--) {
                             int v = (b >> bit) & 1;
                             img.setRGB(x, y, v == 1 ? 0x000000 : 0xFFFFFF);
@@ -80,14 +121,32 @@ public class PNMReader {
         return new ImageData(img, magic, path);
     }
 
+    /**
+     * Reads the next token from the input stream.
+     * <p>
+     * Tokens are separated by whitespace and comments
+     * starting with {@code #}.
+     * </p>
+     *
+     * @param is the input stream
+     * @return the next token as a string
+     * @throws IOException if reading fails
+     */
     private String readToken(InputStream is) throws IOException {
+
         StringBuilder sb = new StringBuilder();
         int b;
 
         while (true) {
             b = is.read();
-            if (b == '#') while (b != '\n') b = is.read();
-            else if (!Character.isWhitespace(b)) break;
+
+            if (b == '#') {
+                while (b != '\n' && b != -1) {
+                    b = is.read();
+                }
+            } else if (!Character.isWhitespace(b)) {
+                break;
+            }
         }
 
         while (b != -1 && !Character.isWhitespace(b)) {
@@ -98,4 +157,3 @@ public class PNMReader {
         return sb.toString();
     }
 }
-
